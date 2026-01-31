@@ -31,6 +31,9 @@ if(MSVC)
 		# Note: CMake 3.12 and up have add_compile_options()
 		add_definitions("-D _CRT_SECURE_NO_WARNINGS")
 	endif()
+	set(EXE_NAME "VGMPlay${MSVC_POSTFIX}")
+else()
+	set(EXE_NAME "vgmplay")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC)
@@ -131,6 +134,11 @@ set(PLAYER_FILES
 )
 set(PLAYER_LIBS)
 set(PLAYER_DEFS)
+set(PLAYER_EXTRA_INSTALL
+	Updates.txt
+	VGMPlay.ini
+	VGMPlay.txt
+)
 
 if(CMAKE_COMPILER_IS_GNUCC AND WIN32)
 	list(APPEND PLAYER_LIBS -municode)
@@ -162,15 +170,26 @@ if(UNIX)
   list(APPEND PLAYER_DEFS "INSTALL_DATADIR=\"${CMAKE_INSTALL_FULL_DATADIR}\"")
 endif()
 
-add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${PLAYER_HEADERS} ${PLAYER_FILES})
-target_compile_definitions(${PROJECT_NAME} PRIVATE ${PLAYER_DEFS})
-target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR} ${INCLUDES})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRARIES} libvgm::vgm-utils libvgm::vgm-audio libvgm::vgm-emu libvgm::vgm-player ${PLAYER_LIBS})
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "bin")
-#add_sanitizers(${PROJECT_NAME})
+add_executable(${EXE_NAME} ${HEADERS} ${SOURCES} ${PLAYER_HEADERS} ${PLAYER_FILES})
+target_compile_definitions(${EXE_NAME} PRIVATE ${PLAYER_DEFS})
+target_include_directories(${EXE_NAME} PRIVATE ${PROJECT_SOURCE_DIR} ${INCLUDES})
+target_link_libraries(${EXE_NAME} PRIVATE ${LIBRARIES} libvgm::vgm-utils libvgm::vgm-audio libvgm::vgm-emu libvgm::vgm-player ${PLAYER_LIBS})
+#add_sanitizers(${EXE_NAME})
+
+install(TARGETS ${EXE_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+foreach(SRC ${PLAYER_EXTRA_INSTALL})
+	if(MSVC)
+		set(DST "${SRC}")
+	else()
+		# Lowercase file names are default on Unix systems due to case sensitivity.
+		# So install with lowercase names for those. (and MSYS2)
+		string(TOLOWER "${SRC}" DST)
+	endif()
+	install(FILES "${SRC}" RENAME "${DST}" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+endforeach(SRC)
 
 if(MSVC AND MSVC_VERSION LESS 1400)
-	target_include_directories(${PROJECT_NAME} PRIVATE
+	target_include_directories(${EXE_NAME} PRIVATE
 		${PROJECT_SOURCE_DIR}/libs/include_vc6
 	)
 endif()
