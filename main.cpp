@@ -550,9 +550,10 @@ static void PrintLibraryInfo(void)
 		"VGM", "S98", "DRO", "GYM", NULL
 	};
 	std::vector<DEV_ID> cfgDevs = GetConfigurableDevices();
+	size_t idx;
 	
 	printf("Supported formats:\n");
-	for (size_t idx = 0; PLAYBACK_ENGINES[idx] != NULL; idx ++)
+	for (idx = 0; PLAYBACK_ENGINES[idx] != NULL; idx ++)
 		printf("    - %s\n", PLAYBACK_ENGINES[idx]);
 	printf("\n");
 	
@@ -622,7 +623,7 @@ static void PrintLibraryInfo(void)
 	printf("\n");
 	
 	printf("Configuration/ROM paths:\n");
-	for (size_t idx = 0; idx < appSearchPaths.size(); idx ++)
+	for (idx = 0; idx < appSearchPaths.size(); idx ++)
 		printf("    - %s\n", appSearchPaths[idx].c_str());
 	
 	return;

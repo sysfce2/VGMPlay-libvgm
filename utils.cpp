@@ -6,12 +6,19 @@
 #include <stdarg.h>
 
 #ifdef _WIN32
+
 #include <Windows.h>	// for WriteConsoleW etc.
+#ifndef INVALID_FILE_ATTRIBUTES	// for MS VC6
+#define INVALID_FILE_ATTRIBUTES	((DWORD)-1)
+#endif
+
 #else
+
 #include <limits.h>		// for PATH_MAX
 #include <unistd.h>		// for getcwd()
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #endif
 
 #include "stdtype.h"
@@ -159,10 +166,10 @@ int CheckFileDirMode(const std::string& path)
 	
 	attr = GetFileAttributes(path.c_str());
 	if (attr == INVALID_FILE_ATTRIBUTES)
-		return 0;	// not found
+		return -1;	// not found
 	if (attr & FILE_ATTRIBUTE_DIRECTORY)
 		return 1;	// directory
-	else if (attr & (FILE_ATTRIBUTE_DEVICE | FILE_ATTRIBUTE_REPARSE_POINT))
+	else if (attr & FILE_ATTRIBUTE_REPARSE_POINT)
 		return 2;	// existing, but is something else
 	else
 		return 0;	// regular file
