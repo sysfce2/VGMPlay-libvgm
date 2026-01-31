@@ -1,5 +1,11 @@
 // TODO:
 //	- catch Ctrl+C
+//	- new configuration concept:
+//		- separate "Configuration" objects for INI and commandline args
+//		- load default settings for everything first
+//		- then overwrite settings for config entries where required
+//			- [YM2413] -> overwrite both chip instance settings
+//			- [YM2413-0] -> overwrite both chip[0] settings
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -163,7 +169,7 @@ int main(int argc, char* argv[])
 			printf("%s not found - falling back to defaults.\n", cfgFileNames[cfgFileNames.size() - 1].c_str());
 		}
 	}
-
+	
 	playerCfg += argCfg;	// override INI settings with commandline options
 	
 #if 0	// print current configuration

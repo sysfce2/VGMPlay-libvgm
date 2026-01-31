@@ -786,8 +786,7 @@ void ApplyCfg_Chip(PlayerA& player, const GeneralOptions& gOpts, const ChipOptio
 	{
 		PlayerBase* pBase = plrs[curPlr];
 		PLR_DEV_OPTS devOpts;
-		UINT8 curInst;
-		UINT8 curChn;
+		UINT8 curSubDev;
 		
 		retVal = pBase->GetDeviceOptions(devID, devOpts);
 		if (retVal)
@@ -800,11 +799,12 @@ void ApplyCfg_Chip(PlayerA& player, const GeneralOptions& gOpts, const ChipOptio
 		devOpts.smplRate = gOpts.chipSmplRate;
 		devOpts.coreOpts = cOpts.addOpts;
 		devOpts.muteOpts.disable = cOpts.chipDisable;
-		for (curInst = 0; curInst < 2; curInst ++)
+		for (curSubDev = 0; curSubDev < 2; curSubDev ++)
 		{
-			devOpts.muteOpts.chnMute[curInst] = cOpts.muteMask[curInst];
+			UINT8 curChn;
+			devOpts.muteOpts.chnMute[curSubDev] = cOpts.muteMask[curSubDev];
 			for (curChn = 0; curChn < 32; curChn ++)
-				devOpts.panOpts.chnPan[curInst][curChn] = (INT16)(0x100 * cOpts.panMask[curInst][curChn]);
+				devOpts.panOpts.chnPan[curSubDev][curChn] = (INT16)(0x100 * cOpts.panMask[curSubDev][curChn]);
 		}
 		//printf("Player %s: Setting chip options for chip 0x%02X, instance 0x%02X\n",
 		//		pBase->GetPlayerName(), cOpts.chipType, cOpts.chipInstance);
@@ -814,6 +814,7 @@ void ApplyCfg_Chip(PlayerA& player, const GeneralOptions& gOpts, const ChipOptio
 		}
 		else
 		{
+			UINT8 curInst;
 			for (curInst = 0; curInst < 2; curInst ++)
 				pBase->SetDeviceOptions(PLR_DEV_ID(cOpts.chipType, curInst), devOpts);
 		}
