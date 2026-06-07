@@ -22,11 +22,12 @@
 #include <emu/EmuStructs.h>	// for DEVRI_SRMODE_* constants
 #include <emu/cores/2612intf.h>
 #include <emu/cores/ayintf.h>
-#include <emu/cores/gb.h>
+#include <emu/cores/gbintf.h>
 #include <emu/cores/nesintf.h>
 #include <emu/cores/okim6258.h>
 #include <emu/cores/scsp.h>
 #include <emu/cores/c352.h>
+#include <emu/cores/vsu.h>
 
 #include "utils.hpp"
 #include "config.hpp"
@@ -663,10 +664,11 @@ static void ParseCfg_ChipSection(ChipOptions& opts, const CfgSection& cfg, UINT8
 	}
 	
 	// chip-specific options
+	opts.addOpts = 0x00;
 	switch(chipType)
 	{
 	case DEVID_YM2612:
-		opts.addOpts  = Cfg_GetBoolOrDefault(ceuList, "PseudoStereo", false) ? OPT_YM2612_PSEUDO_STEREO : 0x00;
+		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "PseudoStereo", false) ? OPT_YM2612_PSEUDO_STEREO : 0x00;
 		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "DACHighpass", false) ? OPT_YM2612_DAC_HIGHPASS : 0x00;
 		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "SSG-EG", false) ? OPT_YM2612_SSGEG : 0x00;
 		opts.addOpts |= (Cfg_GetUIntOrDefault(ceuList, "NukedType", 0) & 0x03) << 4;
@@ -681,26 +683,29 @@ static void ParseCfg_ChipSection(ChipOptions& opts, const CfgSection& cfg, UINT8
 		opts.chipDisable |= Cfg_GetBoolOrDefault(ceuList, "DisableFM", false) ? 0x02 : 0x00;
 		break;
 	case DEVID_AY8910:
-		opts.addOpts = Cfg_GetBoolOrDefault(ceuList, "PCM3chDetect", true) ? OPT_AY8910_PCM3CH_DETECT : 0x00;
+		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "PCM3chDetect", true) ? OPT_AY8910_PCM3CH_DETECT : 0x00;
 		break;
 	case DEVID_GB_DMG:
-		opts.addOpts  = Cfg_GetBoolOrDefault(ceuList, "BoostWaveChn", true) ? OPT_GB_DMG_BOOST_WAVECH : 0x00;
+		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "LegacyMode", true) ? OPT_GB_DMG_LEGACY_MODE: 0x00;
 		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "NoWaveCorrupt", false) ? OPT_GB_DMG_NO_WAVE_CORRUPT : 0x00;
 		break;
 	case DEVID_NES_APU:
-		opts.addOpts  = (Cfg_GetUIntOrDefault(ceuList, "SharedOpts", 0x03) & 0x03) << 0;
+		opts.addOpts |= (Cfg_GetUIntOrDefault(ceuList, "SharedOpts", 0x03) & 0x03) << 0;
 		opts.addOpts |= (Cfg_GetUIntOrDefault(ceuList, "APUOpts", 0x01) & 0x03) << 2;
 		opts.addOpts |= (Cfg_GetUIntOrDefault(ceuList, "DMCOpts", 0x3B) & 0x3F) << 4;
 		opts.addOpts |= (Cfg_GetUIntOrDefault(ceuList, "FDSOpts", 0x00) & 0x03) << 10;
 		break;
 	case DEVID_MSM6258:
-		opts.addOpts = Cfg_GetBoolOrDefault(ceuList, "Enable10Bit", false) ? 0x00 : OPT_MSM6258_FORCE_12BIT;
+		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "Enable10Bit", false) ? 0x00 : OPT_MSM6258_FORCE_12BIT;
 		break;
 	case DEVID_SCSP:
-		opts.addOpts = Cfg_GetBoolOrDefault(ceuList, "BypassDSP", true) ? OPT_SCSP_BYPASS_DSP : 0x00;
+		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "BypassDSP", true) ? OPT_SCSP_BYPASS_DSP : 0x00;
 		break;
 	case DEVID_C352:
-		opts.addOpts = Cfg_GetBoolOrDefault(ceuList, "DisableRear", false) ? OPT_C352_MUTE_REAR : 0x00;
+		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "DisableRear", false) ? OPT_C352_MUTE_REAR : 0x00;
+		break;
+	case DEVID_VBOY_VSU:
+		opts.addOpts |= Cfg_GetBoolOrDefault(ceuList, "WRamWriteWholeOn", false) ? OPT_VSU_WRAM_WRT_WHILE_ON : 0x00;
 		break;
 	}	// end switch(chipType) for chip-specific options
 	
